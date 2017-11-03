@@ -3,7 +3,6 @@ using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
 using Rocket.Unturned.Chat;
 using SDG.Unturned;
-using Steamworks;
 using UnityEngine;
 
 namespace PhaserArray.TrainUnlocker
