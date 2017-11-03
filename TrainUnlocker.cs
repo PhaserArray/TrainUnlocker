@@ -1,4 +1,5 @@
-﻿using Rocket.API.Collections;
+﻿using System.Linq;
+using Rocket.API.Collections;
 using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
 using Rocket.Unturned.Chat;
@@ -42,13 +43,20 @@ namespace PhaserArray.TrainUnlocker
 			}
 		}
 
-		public static int UnlockTrains()
+		public int UnlockTrains()
 		{
 			var unlockCount = 0;
 			var vehicles = VehicleManager.vehicles;
 			foreach (var vehicle in vehicles)
 			{
 				if (vehicle.asset.engine != EEngine.TRAIN || !vehicle.isLocked) continue;
+				if (_config.RequireEmpty)
+				{
+					if (vehicle.passengers.Any(p => p.player != null))
+					{
+						continue;
+					}
+				}
 				VehicleManager.unlockVehicle(vehicle);
 				unlockCount++;
 			}

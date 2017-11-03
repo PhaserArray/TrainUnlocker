@@ -6,11 +6,13 @@ namespace PhaserArray.TrainUnlocker
 	{
 		public float UnlockInterval;
 		public bool SendUnlockMessage;
+		public bool RequireEmpty;
 
 		public void LoadDefaults()
 		{
 			UnlockInterval = 300f;
 			SendUnlockMessage = true;
+			RequireEmpty = true;
 		}
 	}
 }
