@@ -10,7 +10,7 @@ namespace PhaserArray.TrainUnlocker
 {
     public class TrainUnlocker : RocketPlugin<TrainUnlockerConfiguration>
 	{
-	    public const string Version = "v1.0";
+	    public const string Version = "v1.1";
 
 	    private TrainUnlockerConfiguration _config;
 
