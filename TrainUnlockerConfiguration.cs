@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Rocket.API;
+﻿using Rocket.API;
 
 namespace PhaserArray.TrainUnlocker
 {
 	public class TrainUnlockerConfiguration : IRocketPluginConfiguration
 	{
-		public bool UnlockOccupied;
+		public float UnlockInterval;
+		public bool SendUnlockMessage;
 
 		public void LoadDefaults()
 		{
-			UnlockOccupied = true;
+			UnlockInterval = 300f;
+			SendUnlockMessage = true;
 		}
 	}
 }
