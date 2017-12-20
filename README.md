@@ -1,5 +1,7 @@
-Has two basic properties in its config.
+This doesn't really a lot of configuration options.  
+  
+Config:  
+`Enabled` - Whether the plugin should run    
 
-`UnlockInterval` - How often trains are unlocked.  
-`SendUnlockMessage` - Whether the server is alerted when trains are unlocked.  
-`RequireEmpty` - Whether or not the train needs to be empty to be unlocked.
+Localization:  
+`trainunlocker_undid_lock` - Message shown in red to the player that attempted to lock the train.
