@@ -1,13 +1,11 @@
-﻿using System.Linq;
-using Rocket.API;
+﻿using System.Collections;
 using Rocket.API.Collections;
-using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
 using Rocket.Unturned.Chat;
-using Rocket.Unturned.Player;
 using SDG.Unturned;
 using Steamworks;
 using UnityEngine;
+using Logger = Rocket.Core.Logging.Logger;
 
 namespace PhaserArray.TrainUnlocker
 {
@@ -20,63 +18,59 @@ namespace PhaserArray.TrainUnlocker
 	    protected override void Load()
 	    {
 		    _config = Configuration.Instance;
-			
-		    Logger.Log("Starting TrainUnlocker " + Version + "!");
-			InvokeRepeating(nameof(RunTrainUnlocker), _config.UnlockInterval, _config.UnlockInterval);
+
+		    if (_config.Enabled)
+			{
+				SteamChannel.onTriggerSend += OnTriggerSend;
+				Logger.Log("Loaded TrainUnlocker " + Version + "!");
+			}
+		    else
+			{
+				Logger.Log("TrainUnlocker " + Version + " is installed but not enabled!");
+			}
 	    }
 
 	    protected override void Unload()
-	    {
-			CancelInvoke(nameof(RunTrainUnlocker));
-	    }
-
-		public void RunTrainUnlocker()
 		{
-			Logger.Log("Unlocking trains!");
-			var unlockedTrains = UnlockTrains();
-
-			if (!_config.SendUnlockMessage) return;
-			if (unlockedTrains == 1)
+			if (!_config.Enabled)
 			{
-				UnturnedChat.Say(Translate("trainunlocker_unlocked_singular"), Color.yellow);
+				return;
 			}
-			else if (unlockedTrains > 1)
-			{
-				UnturnedChat.Say(Translate("trainunlocker_unlocked_plural", unlockedTrains), Color.yellow);
-			}
+			SteamChannel.onTriggerSend -= OnTriggerSend;
+			Logger.Log("Unloaded TrainUnlocker " + Version + "!");
 		}
 
-		public int UnlockTrains()
+		public void OnTriggerSend(SteamPlayer player, string name, ESteamCall mode, ESteamPacket type, params object[] arguments)
 		{
-			var unlockCount = 0;
-			var vehicles = VehicleManager.vehicles;
-			foreach (var vehicle in vehicles)
+			if (name != "tellVehicleLock")
 			{
-				if (vehicle.asset.engine != EEngine.TRAIN || !vehicle.isLocked) continue;
-				if (_config.RequireEmpty)
-				{
-					if (vehicle.passengers.Any(p => p.player != null))
-					{
-						continue;
-					}
-				}
-				VehicleManager.instance.channel.send(
-					"tellVehicleLock",
-					ESteamCall.ALL,
-					ESteamPacket.UPDATE_RELIABLE_BUFFER,
-					vehicle.instanceID,
-					CSteamID.Nil,
-					CSteamID.Nil,
-					false);
-				unlockCount++;
+				return;
 			}
-			return unlockCount;
+			var vehicle = VehicleManager.getVehicle((uint) arguments[0]);
+			if (vehicle.asset.engine != EEngine.TRAIN || (bool) arguments[3] == false)
+			{
+				return;
+			}
+			UnturnedChat.Say((CSteamID) arguments[1], Translate("trainunlocker_undid_lock"), Color.red);
+			StartCoroutine(DelayedUnlockVehicle(vehicle, 1f));
+		}
+
+		public IEnumerator DelayedUnlockVehicle(InteractableVehicle vehicle, float delay)
+		{
+			yield return new WaitForSecondsRealtime(delay);
+			VehicleManager.instance.channel.send(
+				"tellVehicleLock",
+				ESteamCall.ALL,
+				ESteamPacket.UPDATE_RELIABLE_BUFFER,
+				vehicle.instanceID,
+				CSteamID.Nil,
+				CSteamID.Nil,
+				false);
 		}
 
 		public override TranslationList DefaultTranslations => new TranslationList()
 		{
-			{"trainunlocker_unlocked_singular", "Unlocked the train!"},
-			{"trainunlocker_unlocked_plural", "Unlocked {0} trains!"}
+			{"trainunlocker_undid_lock", "Do not lock the train!"}
 		};
 	}
 }
