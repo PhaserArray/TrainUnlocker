@@ -1,9 +1,12 @@
 ﻿using System.Linq;
+using Rocket.API;
 using Rocket.API.Collections;
 using Rocket.Core.Logging;
 using Rocket.Core.Plugins;
 using Rocket.Unturned.Chat;
+using Rocket.Unturned.Player;
 using SDG.Unturned;
+using Steamworks;
 using UnityEngine;
 
 namespace PhaserArray.TrainUnlocker
@@ -57,7 +60,14 @@ namespace PhaserArray.TrainUnlocker
 						continue;
 					}
 				}
-				VehicleManager.unlockVehicle(vehicle);
+				VehicleManager.instance.channel.send(
+					"tellVehicleLock",
+					ESteamCall.ALL,
+					ESteamPacket.UPDATE_RELIABLE_BUFFER,
+					vehicle.instanceID,
+					CSteamID.Nil,
+					CSteamID.Nil,
+					false);
 				unlockCount++;
 			}
 			return unlockCount;
